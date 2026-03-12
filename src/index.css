@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: 'Baloo 2', cursive;
+  --font-body: 'Nunito', sans-serif;
+
+  --color-sunset-50: #fef7f0;
+  --color-sunset-100: #fdecd8;
+  --color-sunset-200: #fbd5ae;
+  --color-sunset-300: #f8b87a;
+  --color-sunset-400: #f49344;
+  --color-sunset-500: #f1761e;
+  --color-sunset-600: #e25d14;
+  --color-sunset-700: #bb4513;
+  --color-sunset-800: #953817;
+  --color-sunset-900: #783015;
+
+  --color-jewel-50: #f0f4fe;
+  --color-jewel-100: #dde6fc;
+  --color-jewel-200: #c3d4fa;
+  --color-jewel-300: #9ab9f6;
+  --color-jewel-400: #6a93f0;
+  --color-jewel-500: #476de9;
+  --color-jewel-600: #3250dd;
+  --color-jewel-700: #293ecb;
+  --color-jewel-800: #2734a5;
+  --color-jewel-900: #253082;
+
+  --color-emerald-50: #edfcf4;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+
+  --color-warm-50: #fdf8f0;
+  --color-warm-100: #f5ead6;
+  --color-warm-200: #edd8b4;
+  --color-warm-300: #dfc08c;
+  --color-warm-400: #c9a060;
+  --color-warm-500: #b8873f;
+  --color-warm-600: #9c6c2e;
+
+  /* Child accent colors */
+  --color-reid: #476de9;
+  --color-reid-light: #dde6fc;
+  --color-bennett: #10b981;
+  --color-bennett-light: #d1fae5;
+  --color-isla: #e879a8;
+  --color-isla-light: #fce7f3;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(135deg, #fef7f0 0%, #fdecd8 50%, #f0f4fe 100%);
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Baloo 2', cursive;
+}
+
+/* Bounce animation for emoji buttons */
+@keyframes bounce-select {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.25); }
+  50% { transform: scale(0.95); }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.animate-bounce-select {
+  animation: bounce-select 0.4s ease-out;
+}
+
+/* Spin animation */
+@keyframes spin-wheel {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(var(--spin-degrees, 1800deg)); }
+}
+
+.animate-spin-wheel {
+  animation: spin-wheel 3s cubic-bezier(0.17, 0.67, 0.12, 0.99) forwards;
+}
+
+/* Slide in animation */
+@keyframes slide-up {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+/* Fade in */
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Piggy bank wiggle */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+/* Touch targets for kids */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
