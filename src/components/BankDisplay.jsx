@@ -21,9 +21,11 @@ const CHILD_STYLES = {
   },
 }
 
-export default function BankDisplay({ child, nintendoMinutes, bonusPoints }) {
+export default function BankDisplay({ child, nintendoMinutes, bonusPoints, bankConfig }) {
   const [wiggle, setWiggle] = useState(false)
   const style = CHILD_STYLES[child.id] || CHILD_STYLES.reid
+  const bankName = bankConfig?.bankName || 'Nintendo Minutes'
+  const unitLabel = bankConfig?.unitLabel || 'min'
 
   return (
     <div
@@ -42,11 +44,11 @@ export default function BankDisplay({ child, nintendoMinutes, bonusPoints }) {
       <div className="mt-3 space-y-2">
         <div className="bg-white/70 rounded-2xl px-4 py-2">
           <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            🎮 Nintendo Bank
+            🎮 {bankName}
           </div>
           <div className={`font-display text-3xl font-bold ${style.accent}`}>
             {nintendoMinutes}
-            <span className="text-base font-body font-normal text-gray-500"> min</span>
+            <span className="text-base font-body font-normal text-gray-500"> {unitLabel}</span>
           </div>
         </div>
         <div className="bg-white/70 rounded-2xl px-4 py-2">

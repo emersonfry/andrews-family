@@ -42,6 +42,8 @@ export default function ChildSession({
   const weekend = isWeekend()
   const questions = config.questions[child.id]?.[weekend ? 'weekend' : 'weekday'] || []
   const threshold = config.earningThreshold || 80
+  const childBank = config.childBank?.[child.id] || { bankName: 'Nintendo Minutes', unitLabel: 'min', amountPerSession: 15, weeklyCap: 75 }
+  const childBonus = config.childBonus?.[child.id] || { weekdayPerfectPoints: 1, weekendQualifyPoints: 1, weekendThreshold: 80 }
 
   const handleAnswer = (rawScore, maxScore) => {
     const question = questions[currentQ]
@@ -109,14 +111,15 @@ export default function ChildSession({
     let bonusPointsEarned = 0
 
     if (weekend) {
-      if (meetsThreshold) {
-        bonusPointsEarned = 1
+      const weekendThresh = childBonus.weekendThreshold ?? threshold
+      if (scorePercent >= weekendThresh) {
+        bonusPointsEarned = childBonus.weekendQualifyPoints ?? 1
       }
     } else {
       if (meetsThreshold) {
-        minutesEarned = config.weekdayMinutes || 15
+        minutesEarned = childBank.amountPerSession ?? config.weekdayMinutes ?? 15
         if (scorePercent === 100) {
-          bonusPointsEarned = 1
+          bonusPointsEarned = childBonus.weekdayPerfectPoints ?? 1
         }
       }
     }
@@ -155,6 +158,7 @@ export default function ChildSession({
       scorePercent,
       minutesEarned,
       bonusPointsEarned,
+      childBank,
     }
   }
 
@@ -244,8 +248,17 @@ export default function ChildSession({
         isWeekend={weekend}
         threshold={threshold}
         onContinue={onComplete}
+        bankConfig={result.childBank}
       />
     )
+  }
+
+  const handleGoBack = () => {
+    if (currentQ > 0) {
+      // Remove the last answer and go back one question
+      setAnswers(prev => prev.slice(0, -1))
+      setCurrentQ(prev => prev - 1)
+    }
   }
 
   // Questions phase
@@ -259,9 +272,19 @@ export default function ChildSession({
       {/* Progress bar */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-semibold text-gray-500">
-            Question {currentQ + 1} of {questions.length}
-          </span>
+          <div className="flex items-center gap-2">
+            {currentQ > 0 && (
+              <button
+                onClick={handleGoBack}
+                className="touch-target px-3 py-1 rounded-full border-2 border-gray-300 text-gray-500 text-sm font-semibold hover:bg-gray-50 transition-all active:scale-95"
+              >
+                ← Back
+              </button>
+            )}
+            <span className="text-sm font-semibold text-gray-500">
+              Question {currentQ + 1} of {questions.length}
+            </span>
+          </div>
           <span className="text-2xl">{child.emoji}</span>
         </div>
         <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -276,7 +299,7 @@ export default function ChildSession({
       </div>
 
       <QuestionCard
-        key={question.id}
+        key={`${question.id}-${currentQ}-${answers.length}`}
         question={question}
         onAnswer={handleAnswer}
         childColor={child.color}

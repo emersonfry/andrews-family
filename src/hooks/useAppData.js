@@ -92,11 +92,12 @@ export function useAppData() {
   const addNintendoMinutes = useCallback((childId, amount) => {
     setBalances(prev => {
       const child = prev[childId] || { nintendoMinutes: 0, bonusPoints: 0 }
-      const maxWeekly = config.maxWeeklyMinutes || 75
+      const childBank = config.childBank?.[childId]
+      const maxWeekly = childBank?.weeklyCap ?? config.maxWeeklyMinutes ?? 75
       const newMinutes = Math.min(child.nintendoMinutes + amount, maxWeekly)
       return { ...prev, [childId]: { ...child, nintendoMinutes: newMinutes } }
     })
-  }, [config.maxWeeklyMinutes])
+  }, [config.childBank, config.maxWeeklyMinutes])
 
   const addBonusPoints = useCallback((childId, amount) => {
     setBalances(prev => {
