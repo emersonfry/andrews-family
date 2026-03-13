@@ -64,6 +64,7 @@ export default function App() {
                 child={child}
                 nintendoMinutes={appData.getNintendoMinutes(child.id)}
                 bonusPoints={appData.getBonusPoints(child.id)}
+                bankConfig={config.childBank?.[child.id]}
               />
             ))}
           </div>

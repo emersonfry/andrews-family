@@ -8,10 +8,13 @@ export default function SessionSummary({
   isWeekend,
   threshold,
   onContinue,
+  bankConfig,
 }) {
   const colorVar = `var(--color-${child.color})`
   const isPerfect = scorePercent === 100
   const meetsThreshold = scorePercent >= threshold
+  const bankName = bankConfig?.bankName || 'Nintendo Minutes'
+  const unitLabel = bankConfig?.unitLabel || 'min'
 
   return (
     <div className="text-center animate-slide-up max-w-lg mx-auto">
@@ -44,12 +47,12 @@ export default function SessionSummary({
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl">🎮</span>
               <span className="font-display text-2xl font-bold" style={{ color: colorVar }}>
-                {minutesEarned > 0 ? `+${minutesEarned} minutes earned!` : 'No minutes tonight'}
+                {minutesEarned > 0 ? `+${minutesEarned} ${unitLabel} earned!` : `No ${unitLabel} tonight`}
               </span>
             </div>
             {minutesEarned === 0 && (
               <p className="text-sm text-gray-400 mt-1">
-                Need {threshold}% to earn minutes — you&apos;ll get there! 💪
+                Need {threshold}% to earn {unitLabel} — you&apos;ll get there! 💪
               </p>
             )}
           </div>
@@ -78,7 +81,7 @@ export default function SessionSummary({
                 <div className="font-display text-2xl font-bold" style={{ color: colorVar }}>
                   {totalMinutes}
                 </div>
-                <div className="text-xs text-gray-400">minutes this week</div>
+                <div className="text-xs text-gray-400">{unitLabel} this week</div>
               </div>
             )}
             <div>

@@ -433,45 +433,49 @@ export default function AdminPanel({ config, appData, onBack }) {
       {/* Balances Tab */}
       {activeTab === 'balances' && (
         <div className="space-y-4">
-          {config.children.map(child => (
-            <div key={child.id} className="bg-white rounded-xl p-5 border border-gray-200">
-              <h4 className="font-display text-lg font-bold text-gray-800 mb-3">
-                {child.emoji} {child.name}
-              </h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">
-                    🎮 Nintendo Minutes
-                  </label>
-                  <input
-                    type="number"
-                    value={appData.getNintendoMinutes(child.id)}
-                    onChange={(e) => appData.setBalanceDirect(child.id, 'nintendoMinutes', parseInt(e.target.value) || 0)}
-                    className="w-full p-2 border rounded-lg text-center font-bold text-lg"
-                    min={0}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">
-                    ⭐ Bonus Points
-                  </label>
-                  <input
-                    type="number"
-                    value={appData.getBonusPoints(child.id)}
-                    onChange={(e) => appData.setBalanceDirect(child.id, 'bonusPoints', parseInt(e.target.value) || 0)}
-                    className="w-full p-2 border rounded-lg text-center font-bold text-lg"
-                    min={0}
-                  />
+          {config.children.map(child => {
+            const bank = config.childBank?.[child.id] || {}
+            return (
+              <div key={child.id} className="bg-white rounded-xl p-5 border border-gray-200">
+                <h4 className="font-display text-lg font-bold text-gray-800 mb-3">
+                  {child.emoji} {child.name}
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">
+                      🎮 {bank.bankName || 'Nintendo Minutes'}
+                    </label>
+                    <input
+                      type="number"
+                      value={appData.getNintendoMinutes(child.id)}
+                      onChange={(e) => appData.setBalanceDirect(child.id, 'nintendoMinutes', parseInt(e.target.value) || 0)}
+                      className="w-full p-2 border rounded-lg text-center font-bold text-lg"
+                      min={0}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">
+                      ⭐ Bonus Points
+                    </label>
+                    <input
+                      type="number"
+                      value={appData.getBonusPoints(child.id)}
+                      onChange={(e) => appData.setBalanceDirect(child.id, 'bonusPoints', parseInt(e.target.value) || 0)}
+                      className="w-full p-2 border rounded-lg text-center font-bold text-lg"
+                      min={0}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
       {/* Settings Tab */}
       {activeTab === 'settings' && editConfig && (
         <div className="space-y-6">
+          {/* PIN */}
           <div className="bg-white rounded-xl p-5 border border-gray-200">
             <h4 className="font-semibold text-gray-800 mb-3">Change PIN</h4>
             <div className="flex gap-2">
@@ -501,9 +505,10 @@ export default function AdminPanel({ config, appData, onBack }) {
             </div>
           </div>
 
+          {/* Global earning threshold */}
           <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <h4 className="font-semibold text-gray-800 mb-3">Earning Threshold</h4>
-            <p className="text-sm text-gray-500 mb-2">Minimum score % to earn Nintendo minutes</p>
+            <h4 className="font-semibold text-gray-800 mb-3">Weekday Earning Threshold</h4>
+            <p className="text-sm text-gray-500 mb-2">Minimum score % to earn bank rewards on weekdays</p>
             <div className="flex items-center gap-3">
               <input
                 type="range"
@@ -522,6 +527,7 @@ export default function AdminPanel({ config, appData, onBack }) {
             </div>
           </div>
 
+          {/* Fair Rotation */}
           <div className="bg-white rounded-xl p-5 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
@@ -544,6 +550,142 @@ export default function AdminPanel({ config, appData, onBack }) {
               </button>
             </div>
           </div>
+
+          {/* Per-child settings */}
+          <h3 className="font-display text-lg font-bold text-gray-700 pt-2">Per-Child Settings</h3>
+          {editConfig.children.map((child, ci) => {
+            const bank = editConfig.childBank?.[child.id] || { bankName: 'Nintendo Minutes', unitLabel: 'min', amountPerSession: 15, weeklyCap: 75 }
+            const bonus = editConfig.childBonus?.[child.id] || { weekdayPerfectPoints: 1, weekendQualifyPoints: 1, weekendThreshold: 80 }
+            const updateChild = (field, value) => {
+              const updated = JSON.parse(JSON.stringify(editConfig))
+              updated.children[ci][field] = value
+              setEditConfig(updated)
+              saveChanges(updated)
+            }
+            const updateBank = (field, value) => {
+              const updated = JSON.parse(JSON.stringify(editConfig))
+              if (!updated.childBank) updated.childBank = {}
+              if (!updated.childBank[child.id]) updated.childBank[child.id] = { ...bank }
+              updated.childBank[child.id][field] = value
+              setEditConfig(updated)
+              saveChanges(updated)
+            }
+            const updateBonus = (field, value) => {
+              const updated = JSON.parse(JSON.stringify(editConfig))
+              if (!updated.childBonus) updated.childBonus = {}
+              if (!updated.childBonus[child.id]) updated.childBonus[child.id] = { ...bonus }
+              updated.childBonus[child.id][field] = value
+              setEditConfig(updated)
+              saveChanges(updated)
+            }
+            return (
+              <div key={child.id} className="bg-white rounded-xl p-5 border border-gray-200 space-y-4">
+                <h4 className="font-display text-lg font-bold text-gray-800">
+                  {child.emoji} {child.name}
+                </h4>
+
+                {/* Avatar emoji */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">
+                    Avatar Emoji
+                  </label>
+                  <input
+                    value={child.emoji}
+                    onChange={(e) => updateChild('emoji', e.target.value)}
+                    className="w-20 p-2 border rounded-lg text-center text-2xl"
+                    maxLength={4}
+                  />
+                </div>
+
+                {/* Bank settings */}
+                <div className="border-t pt-3">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
+                    Primary Bank
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Bank Name</label>
+                      <input
+                        value={bank.bankName}
+                        onChange={(e) => updateBank('bankName', e.target.value)}
+                        className="w-full p-2 border rounded-lg text-sm"
+                        placeholder="Nintendo Minutes"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Unit Label</label>
+                      <input
+                        value={bank.unitLabel}
+                        onChange={(e) => updateBank('unitLabel', e.target.value)}
+                        className="w-full p-2 border rounded-lg text-sm"
+                        placeholder="min"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Per Session</label>
+                      <input
+                        type="number"
+                        value={bank.amountPerSession}
+                        onChange={(e) => updateBank('amountPerSession', parseInt(e.target.value) || 0)}
+                        className="w-full p-2 border rounded-lg text-sm text-center"
+                        min={0}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Weekly Cap</label>
+                      <input
+                        type="number"
+                        value={bank.weeklyCap}
+                        onChange={(e) => updateBank('weeklyCap', parseInt(e.target.value) || 0)}
+                        className="w-full p-2 border rounded-lg text-sm text-center"
+                        min={0}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bonus point rules */}
+                <div className="border-t pt-3">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
+                    Bonus Point Rules
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Weekday 100% pts</label>
+                      <input
+                        type="number"
+                        value={bonus.weekdayPerfectPoints}
+                        onChange={(e) => updateBonus('weekdayPerfectPoints', parseInt(e.target.value) || 0)}
+                        className="w-full p-2 border rounded-lg text-sm text-center"
+                        min={0}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Weekend pts</label>
+                      <input
+                        type="number"
+                        value={bonus.weekendQualifyPoints}
+                        onChange={(e) => updateBonus('weekendQualifyPoints', parseInt(e.target.value) || 0)}
+                        className="w-full p-2 border rounded-lg text-sm text-center"
+                        min={0}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Weekend thresh %</label>
+                      <input
+                        type="number"
+                        value={bonus.weekendThreshold}
+                        onChange={(e) => updateBonus('weekendThreshold', parseInt(e.target.value) || 0)}
+                        className="w-full p-2 border rounded-lg text-sm text-center"
+                        min={0}
+                        max={100}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
 
           {settingsSaved && (
             <div className="text-center text-emerald-600 font-semibold animate-fade-in">

@@ -11,6 +11,18 @@ export const defaultConfig = {
   weekdayMinutes: 15,
   maxWeeklyMinutes: 75,
   children: CHILDREN,
+  // Per-child bank settings (overrides global weekdayMinutes/maxWeeklyMinutes)
+  childBank: {
+    reid: { bankName: 'Nintendo Minutes', unitLabel: 'min', amountPerSession: 15, weeklyCap: 75 },
+    bennett: { bankName: 'Nintendo Minutes', unitLabel: 'min', amountPerSession: 15, weeklyCap: 75 },
+    isla: { bankName: 'Nintendo Minutes', unitLabel: 'min', amountPerSession: 15, weeklyCap: 75 },
+  },
+  // Per-child bonus point rules
+  childBonus: {
+    reid: { weekdayPerfectPoints: 1, weekendQualifyPoints: 1, weekendThreshold: 80 },
+    bennett: { weekdayPerfectPoints: 1, weekendQualifyPoints: 1, weekendThreshold: 80 },
+    isla: { weekdayPerfectPoints: 1, weekendQualifyPoints: 1, weekendThreshold: 80 },
+  },
   questions: {
     reid: {
       weekday: [
