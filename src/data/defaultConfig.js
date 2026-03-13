@@ -205,13 +205,30 @@ export const defaultConfig = {
   ],
 }
 
-export const MICRO_RESPONSES = [
-  'Thanks for being honest! 💛',
-  'Every day is a new chance! ✨',
-  "That's real self-awareness! 🌟",
-  'Love that you thought about it! 💭',
-  'You\'re growing every day! 🌱',
-  'Honesty is a superpower! 💪',
-  'Tomorrow is a fresh start! 🌅',
-  'That takes courage to say! 🦁',
-]
+// Tiered micro-responses: high (top score), mid (middle), low (bottom)
+export const MICRO_RESPONSES = {
+  high: [
+    'Excellent work! 🌟',
+    'Perfect! ✨',
+    "That's what it's all about! 💪",
+    'Amazing job today! 🎉',
+    'You crushed it! 🏆',
+    'Way to go! 🙌',
+  ],
+  mid: [
+    'Every day is a chance to get better! ✨',
+    'Thanks for being honest! 💛',
+    "That's real self-awareness! 🌟",
+    'Love that you thought about it! 💭',
+    "You're growing every day! 🌱",
+    'Good effort — keep it up! 💪',
+  ],
+  low: [
+    'Tomorrow is a fresh start! 🌅',
+    'Proud of you for being honest. 💛',
+    'That takes courage to say! 🦁',
+    'Every day is a new chance! ✨',
+    "You'll get there — we believe in you! 💪",
+    'Honesty is a superpower! 🌟',
+  ],
+}

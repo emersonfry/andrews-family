@@ -18,17 +18,27 @@ export default function Spinner({ children, onOrderDecided }) {
     setSpinning(true)
     setOrder(null)
 
+    const segmentSize = 360 / children.length
     // Random rotation: 5-8 full spins + random offset
-    const extraSpins = 5 + Math.random() * 3
-    const totalDeg = extraSpins * 360 + Math.random() * 360
-    setRotation(prev => prev + totalDeg)
+    const extraSpins = (5 + Math.random() * 3) * 360
+    const randomOffset = Math.random() * 360
+    const newRotation = rotation + extraSpins + randomOffset
+    setRotation(newRotation)
 
-    // Shuffle children for random order
-    const shuffled = [...children].sort(() => Math.random() - 0.5)
+    // Determine which segment the top pointer lands on.
+    // Segments are laid out clockwise from the top (12 o'clock).
+    // After rotating clockwise by newRotation degrees, the segment
+    // originally at angle (360 - newRotation%360) is now under the pointer.
+    const effectiveAngle = ((360 - (newRotation % 360)) % 360)
+    const winnerIndex = Math.floor(effectiveAngle / segmentSize)
+
+    // Build order: winner first, rest shuffled
+    const winner = children[winnerIndex]
+    const rest = children.filter((_, i) => i !== winnerIndex).sort(() => Math.random() - 0.5)
 
     setTimeout(() => {
       setSpinning(false)
-      setOrder(shuffled)
+      setOrder([winner, ...rest])
     }, 3000)
   }
 

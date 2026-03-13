@@ -12,6 +12,12 @@ export default function AdminPanel({ config, appData, onBack }) {
   const [editChildId, setEditChildId] = useState('reid')
   const [editDayType, setEditDayType] = useState('weekday')
 
+  const SCALE_TYPES = [
+    { value: 'five_point', label: '5-point text scale', defaultLabels: ['Needs work', 'Getting there', 'Okay', 'Good', 'Great'] },
+    { value: 'three_emoji', label: '3-emoji scale', defaultLabels: ['Tough day', 'Pretty good', 'Amazing!'] },
+    { value: 'yes_not_yet', label: 'Yes / Not Yet', defaultLabels: null },
+  ]
+
   // Reward editing state
   const [editingReward, setEditingReward] = useState(null)
   const [newRewardName, setNewRewardName] = useState('')
@@ -120,7 +126,7 @@ export default function AdminPanel({ config, appData, onBack }) {
             {config.children.map(child => (
               <button
                 key={child.id}
-                onClick={() => setEditChildId(child.id)}
+                onClick={() => { setEditChildId(child.id); setEditingQuestion(null) }}
                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                   editChildId === child.id
                     ? 'bg-gray-800 text-white'
@@ -136,7 +142,7 @@ export default function AdminPanel({ config, appData, onBack }) {
             {['weekday', 'weekend'].map(dt => (
               <button
                 key={dt}
-                onClick={() => setEditDayType(dt)}
+                onClick={() => { setEditDayType(dt); setEditingQuestion(null) }}
                 className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                   editDayType === dt
                     ? 'bg-gray-700 text-white'
@@ -155,26 +161,67 @@ export default function AdminPanel({ config, appData, onBack }) {
                   <input
                     value={q.text}
                     onChange={(e) => {
-                      const updated = { ...editConfig }
+                      const updated = JSON.parse(JSON.stringify(editConfig))
                       updated.questions[editChildId][editDayType][idx].text = e.target.value
-                      setEditConfig({ ...updated })
+                      setEditConfig(updated)
                     }}
                     className="w-full p-2 border rounded-lg text-sm"
+                    placeholder="Question text"
                   />
-                  <div className="text-xs text-gray-400">Type: {q.type}</div>
-                  {q.labels && q.labels.map((label, li) => (
-                    <input
-                      key={li}
-                      value={label}
+
+                  {/* Scale type selector */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">
+                      Scale Type
+                    </label>
+                    <select
+                      value={q.type}
                       onChange={(e) => {
-                        const updated = { ...editConfig }
-                        updated.questions[editChildId][editDayType][idx].labels[li] = e.target.value
-                        setEditConfig({ ...updated })
+                        const newType = e.target.value
+                        const updated = JSON.parse(JSON.stringify(editConfig))
+                        const question = updated.questions[editChildId][editDayType][idx]
+                        question.type = newType
+                        const scaleInfo = SCALE_TYPES.find(s => s.value === newType)
+                        if (newType === 'yes_not_yet') {
+                          delete question.labels
+                        } else if (scaleInfo.defaultLabels) {
+                          question.labels = scaleInfo.defaultLabels.map((d, i) =>
+                            (q.labels && q.labels[i]) || d
+                          )
+                        }
+                        setEditConfig(updated)
                       }}
-                      className="w-full p-2 border rounded-lg text-xs"
-                    />
-                  ))}
-                  <div className="flex gap-2">
+                      className="w-full p-2 border rounded-lg text-sm bg-white"
+                    >
+                      {SCALE_TYPES.map(st => (
+                        <option key={st.value} value={st.value}>{st.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Label editors */}
+                  {q.type !== 'yes_not_yet' && q.labels && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Answer Labels ({q.type === 'five_point' ? 'low → high' : '😢 → 😄'})
+                      </label>
+                      {q.labels.map((label, li) => (
+                        <input
+                          key={li}
+                          value={label}
+                          onChange={(e) => {
+                            const updated = JSON.parse(JSON.stringify(editConfig))
+                            updated.questions[editChildId][editDayType][idx].labels[li] = e.target.value
+                            setEditConfig(updated)
+                          }}
+                          className="w-full p-2 border rounded-lg text-xs"
+                          placeholder={`Option ${li + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => {
                         saveChanges(editConfig)
@@ -193,6 +240,17 @@ export default function AdminPanel({ config, appData, onBack }) {
                     >
                       Cancel
                     </button>
+                    <button
+                      onClick={() => {
+                        const updated = JSON.parse(JSON.stringify(editConfig))
+                        updated.questions[editChildId][editDayType].splice(idx, 1)
+                        saveChanges(updated)
+                        setEditingQuestion(null)
+                      }}
+                      className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-semibold"
+                    >
+                      Delete Question
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -205,7 +263,7 @@ export default function AdminPanel({ config, appData, onBack }) {
                   </div>
                   <button
                     onClick={() => setEditingQuestion(q.id)}
-                    className="px-3 py-1 text-xs bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold"
+                    className="px-3 py-1 text-xs bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold flex-shrink-0"
                   >
                     Edit
                   </button>
@@ -213,6 +271,27 @@ export default function AdminPanel({ config, appData, onBack }) {
               )}
             </div>
           ))}
+
+          {/* Add new question */}
+          <button
+            onClick={() => {
+              const updated = JSON.parse(JSON.stringify(editConfig))
+              const questions = updated.questions[editChildId][editDayType]
+              const newId = `${editChildId}-${editDayType.slice(0, 2)}-${Date.now()}`
+              const newQ = {
+                id: newId,
+                text: '',
+                type: 'three_emoji',
+                labels: ['Tough day', 'Pretty good', 'Amazing!'],
+              }
+              questions.push(newQ)
+              setEditConfig(updated)
+              setEditingQuestion(newId)
+            }}
+            className="w-full py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all"
+          >
+            + Add Question for {config.children.find(c => c.id === editChildId)?.name} ({editDayType})
+          </button>
         </div>
       )}
 
