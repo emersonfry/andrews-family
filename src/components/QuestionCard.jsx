@@ -1,8 +1,17 @@
 import { useState } from 'react'
 import { MICRO_RESPONSES } from '../data/defaultConfig.js'
 
-function getRandomResponse() {
-  return MICRO_RESPONSES[Math.floor(Math.random() * MICRO_RESPONSES.length)]
+// tier: 'high' (top score), 'mid' (middle), 'low' (bottom)
+function getRandomResponse(tier) {
+  const pool = MICRO_RESPONSES[tier] || MICRO_RESPONSES.mid
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+// Determine tier from selected index and total options
+function getTier(selectedIndex, totalOptions) {
+  if (selectedIndex === totalOptions - 1) return 'high'
+  if (selectedIndex === 0) return 'low'
+  return 'mid'
 }
 
 function FivePointScale({ question, onAnswer, childColor }) {
@@ -12,7 +21,7 @@ function FivePointScale({ question, onAnswer, childColor }) {
 
   const handleSelect = (index) => {
     setSelected(index)
-    setResponse(getRandomResponse())
+    setResponse(getRandomResponse(getTier(index, question.labels.length)))
     setShowResponse(true)
     setTimeout(() => {
       onAnswer(index + 1, 5) // score is 1-5
@@ -71,7 +80,7 @@ function ThreeEmojiScale({ question, onAnswer, childColor }) {
 
   const handleSelect = (index) => {
     setSelected(index)
-    setResponse(getRandomResponse())
+    setResponse(getRandomResponse(getTier(index, 3)))
     setShowResponse(true)
     setTimeout(() => {
       onAnswer(index + 1, 3) // score is 1-3
@@ -120,7 +129,7 @@ function YesNotYetScale({ onAnswer, childColor }) {
 
   const handleSelect = (isYes) => {
     setSelected(isYes ? 'yes' : 'no')
-    setResponse(getRandomResponse())
+    setResponse(getRandomResponse(isYes ? 'high' : 'low'))
     setShowResponse(true)
     setTimeout(() => {
       onAnswer(isYes ? 1 : 0, 1) // 1=100%, 0=0%
